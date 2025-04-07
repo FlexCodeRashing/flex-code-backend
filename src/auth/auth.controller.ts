@@ -9,7 +9,7 @@ export class AuthController {
     @Get('/validate_token')
     validateToken(@Req() req: Request, @Res() res: Response) {
         let token = req.headers.authorization;
-        if (!token) {
+        if (!token || !token.startsWith("Bearer ")) {
             return res.status(401);
         }
         token = token.replace('Bearer ', '');
