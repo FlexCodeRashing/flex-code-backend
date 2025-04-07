@@ -5,4 +5,6 @@ import {Response} from "express";
 @Controller('/auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
+
+
 }
