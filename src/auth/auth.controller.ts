@@ -1,4 +1,4 @@
-import {Controller, Post, Req, Res} from '@nestjs/common';
+import {Controller, Get, Req, Res} from '@nestjs/common';
 import {Request, Response} from "express";
 import {AuthService} from "./auth.service";
 
@@ -6,15 +6,17 @@ import {AuthService} from "./auth.service";
 export class AuthController {
     constructor(private authService: AuthService) {}
 
-    @Post('/validate_token')
+    @Get('/validate_token')
     validateToken(@Req() req: Request, @Res() res: Response) {
-        if (!(req["access_token"])) {
+        let token = req.headers.authorization;
+        if (!token) {
             return res.status(401);
         }
+        token = token.replace('Bearer ', '');
         if (!process.env.DATABASE_URL) {
             return res.status(500)
         }
-        const token_validation = this.authService.validateToken(req["access_token"])
+        const token_validation = this.authService.validateToken(token)
         if (token_validation[0]) {
             return res.status(200).json(JSON.stringify(token_validation[1]))
         } else {
