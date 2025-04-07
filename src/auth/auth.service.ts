@@ -1,24 +1,28 @@
 import {Injectable} from "@nestjs/common";
-import jwt, {JwtPayload} from "jsonwebtoken";
-import * as process from "node:process";
+import {JwtPayload} from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+
 
 @Injectable()
 export class AuthService {
     private generateJwtId(userId: string): string {
         return `${userId}`
     }
-    generateToken(payload: string, expiresIn: number, jwtId: string): string | null {
-        if (!process.env.JWT_SECRET) {
+    generateToken(payload: string, expiresIn: number): string | null {
+        const payloadJSON = JSON.parse(payload)
+        if (!process.env.JWT_SECRET || !payloadJSON || !payloadJSON["user"]["id"]) {
             return null;
         }
         try {
-            const token = jwt.sign(payload, `${process.env.JWT_SECRET}`, {
+            const jwtId = this.generateJwtId(payloadJSON["user"]["id"])
+            const token = jwt.sign(payloadJSON, `${process.env.JWT_SECRET}`, {
                 jwtid: jwtId,
                 expiresIn: expiresIn
             });
             if (token != "" && token != undefined) return token;
             return null;
-        } catch (_) {
+        } catch (e) {
+            console.error(e)
             return null;
         }
     }
@@ -34,6 +38,7 @@ export class AuthService {
                 data = _data
             }
             const jwtId = this.generateJwtId(data["user"]["id"]);
+            if (!jwtId) throw new Error("Incorrect token data");
             data = jwt.verify(token, `${process.env.JWT_SECRET}`, {
                 jwtid: jwtId
             })
