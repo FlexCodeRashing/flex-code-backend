@@ -1,6 +1,8 @@
 import {Injectable} from "@nestjs/common";
 import {JwtPayload} from "jsonwebtoken";
 import * as jwt from "jsonwebtoken";
+import * as hash from "hash.js"
+import {neon} from "@neondatabase/serverless";
 
 
 @Injectable()
@@ -8,6 +10,7 @@ export class AuthService {
     private generateJwtId(userId: string): string {
         return `${userId}`
     }
+
     generateToken(payload: string, expiresIn: number): string | null {
         const payloadJSON = JSON.parse(payload)
         if (!process.env.JWT_SECRET || !payloadJSON || !payloadJSON["user"]["id"]) {
@@ -46,5 +49,13 @@ export class AuthService {
         } catch (_) {
             return [false, null];
         }
+    }
+
+    async validatePassword(email: string, password: string): Promise<boolean> {
+        const sql = neon(`${process.env.DATABASE_URL}`)
+        const [user] = await sql(`SELECT * FROM Users WHERE email = $1`, [email])
+        console.log(user)
+        if (!user) return false;
+        return true
     }
 }
