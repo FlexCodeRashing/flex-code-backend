@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import {AuthModule} from "./auth/auth.module";
 import {UsersModule} from "./users/users.module";
 import {ThrottlerGuard, ThrottlerModule} from "@nestjs/throttler";
@@ -17,7 +16,7 @@ import {APP_GUARD} from "@nestjs/core";
         ]
     }), AuthModule, UsersModule],
     controllers: [AppController],
-    providers: [AppService, {
+    providers: [{
         provide: APP_GUARD,
         useClass: ThrottlerGuard
     }],
