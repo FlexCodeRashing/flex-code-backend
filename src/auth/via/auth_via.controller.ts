@@ -19,14 +19,21 @@ export class AuthViaController {
         }
         const email = auth[0]
         const password = auth.slice(1).join(";")
-        const validation = await this.authService.validatePassword(email, password)
-        if (!validation) {
-            return res.status(401)
+        if (!email || !password) {
+            return res.status(401);
+        }
+        const [validation, userData] = await this.authService.validatePassword(email, password)
+        if (!validation || !userData) {
+            return res.status(401);
         }
         const tokenData = {
-            // TODO: проверить работа authService.validatePassword
+            "scope": [],
+            "user_id": userData["id"]
+        };
+        const token = this.authService.generateToken(JSON.stringify(tokenData), 1000*60*60*24*2);
+        if (token === null) {
+            return res.status(500);
         }
-        const token = this.authService.generateToken(JSON.stringify(tokenData), 1000*60*60*24*2)
         return res.status(200).json(token);
     }
 }

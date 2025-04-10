@@ -13,11 +13,11 @@ export class AuthService {
 
     generateToken(payload: string, expiresIn: number): string | null {
         const payloadJSON = JSON.parse(payload)
-        if (!process.env.JWT_SECRET || !payloadJSON || !payloadJSON["user"]["id"]) {
+        if (!process.env.JWT_SECRET || !payloadJSON || !payloadJSON["user_id"]) {
             return null;
         }
         try {
-            const jwtId = this.generateJwtId(payloadJSON["user"]["id"])
+            const jwtId = this.generateJwtId(payloadJSON["user_id"])
             const token = jwt.sign(payloadJSON, `${process.env.JWT_SECRET}`, {
                 jwtid: jwtId,
                 expiresIn: expiresIn
@@ -40,7 +40,7 @@ export class AuthService {
             } else {
                 data = _data
             }
-            const jwtId = this.generateJwtId(data["user"]["id"]);
+            const jwtId = this.generateJwtId(data["user_id"]);
             if (!jwtId) throw new Error("Incorrect token data");
             data = jwt.verify(token, `${process.env.JWT_SECRET}`, {
                 jwtid: jwtId
