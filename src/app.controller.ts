@@ -7,6 +7,6 @@ export class AppController {
     @SkipThrottle()
     @Get("/ping")
     getHello(@Res() res: Response) {
-        return res.status(2000);
+        return res.status(200);
     }
 }
