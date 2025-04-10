@@ -51,11 +51,14 @@ export class AuthService {
         }
     }
 
-    async validatePassword(email: string, password: string): Promise<boolean> {
+    async validatePassword(email: string, password: string): Promise<[boolean, object | null]> {
         const sql = neon(`${process.env.DATABASE_URL}`)
         const [user] = await sql(`SELECT * FROM Users WHERE email = $1`, [email])
-        console.log(user)
-        if (!user) return false;
-        return true
+        if (!user || !user["hash_password"] || !user["user_id"]) return [false, null];
+        const saltPassword = `${password}!!!${user["user_id"]}`
+        const hashedPassword = hash.sha256().update(saltPassword).digest("hex")
+        console.log(hashedPassword)
+        if (user["hash_password"] !== hashedPassword) return [false, null];
+        return [true, user]
     }
 }
