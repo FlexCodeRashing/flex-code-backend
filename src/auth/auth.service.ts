@@ -1,4 +1,4 @@
-import {Injectable} from "@nestjs/common";
+import {HttpException, Injectable} from "@nestjs/common";
 import {JwtPayload} from "jsonwebtoken";
 import * as jwt from "jsonwebtoken";
 import * as hash from "hash.js"
@@ -11,10 +11,11 @@ export class AuthService {
         return `${userId}`
     }
 
-    generateToken(payload: string, expiresIn: number): string | null {
+    generateToken(payload: string, expiresIn: number): string {
         const payloadJSON = JSON.parse(payload)
+        console.log(payloadJSON)
         if (!process.env.JWT_SECRET || !payloadJSON || !payloadJSON["user_id"]) {
-            return null;
+            throw new HttpException("Internal Server Error", 500)
         }
         try {
             const jwtId = this.generateJwtId(payloadJSON["user_id"])
@@ -23,10 +24,10 @@ export class AuthService {
                 expiresIn: expiresIn
             });
             if (token != "" && token != undefined) return token;
-            return null;
+            throw new Error("Got empty token from jwt.sign")
         } catch (e) {
             console.error(e)
-            return null;
+            throw new HttpException("JWT token generation error", 500)
         }
     }
 
